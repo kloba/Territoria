@@ -1,92 +1,87 @@
-# Territoria
+# Territoria - GPS Territory Capture Game
 
-A GPS-based territory capture game PWA built with Flutter Web. Walk around to capture real-world territory in a Paper.io-style gameplay experience.
+A simple, lightweight Progressive Web App (PWA) that lets you capture real-world territory by walking around with GPS.
 
 ## Features
 
-- Real GPS tracking with location-based gameplay
-- Territory capture by walking outside your zone and returning
-- Daily statistics tracking (distance, steps, area captured)
-- Progressive Web App - installable on mobile devices
-- Offline data persistence
-- Clean, responsive UI with real-time map updates
+- 🗺️ **Real-time GPS tracking** - See your position on an OpenStreetMap
+- 🏃 **Territory capture** - Walk outside your zone to create trails, return to capture
+- 📊 **Live statistics** - Track distance walked, territory size, and captures
+- 📱 **PWA support** - Install on your phone for native-like experience
+- 🎯 **Simple gameplay** - No accounts, no servers, just walk and capture
 
-## Setup
+## Live Demo
+
+Visit: https://kloba.github.io/Territoria/
+
+## How to Play
+
+1. **Grant location permission** when prompted
+2. **Blue circle** is your territory (starts at 20m radius)
+3. **Walk outside** your territory to start recording a trail (red line)
+4. **Return to your territory** to capture the area
+5. **Expand** your territory with each capture
+
+## Technical Details
+
+### Architecture
+- **Flutter Web** - Single page application
+- **Minimal dependencies** - Only essential packages
+- **No backend** - Everything runs locally
+- **Simple state management** - No complex patterns
+
+### Dependencies
+- `flutter_map` - Map rendering
+- `geolocator` - GPS tracking
+- `latlong2` - Coordinate handling
+
+## Development
 
 ### Prerequisites
+- Flutter SDK 3.0+
+- Chrome browser
 
-- Flutter SDK (3.0.0 or higher)
-- Chrome browser for web development
-- HTTPS server for PWA deployment
-
-### Installation
-
-1. Clone the repository:
+### Running locally
 ```bash
-git clone https://github.com/yourusername/territoria.git
-cd territoria
-```
-
-2. Install dependencies:
-```bash
+# Install dependencies
 flutter pub get
-```
 
-3. Generate required files (Hive adapters):
-```bash
-flutter packages pub run build_runner build --delete-conflicting-outputs
-```
-
-4. Add app icons to `web/icons/` directory:
-   - Icon-192.png (192x192)
-   - Icon-512.png (512x512)
-   - Icon-maskable-192.png (192x192)
-   - Icon-maskable-512.png (512x512)
-
-## Running the App
-
-### Development
-
-```bash
+# Run in Chrome
 flutter run -d chrome --web-renderer html
 ```
 
-Note: Use `--web-renderer html` for better GPS support in browsers.
-
-### Building for Production
-
+### Building for production
 ```bash
-flutter build web --web-renderer html --release
+# Build optimized version
+flutter build web --release --web-renderer html
+
+# Deploy the build/web directory
 ```
 
-The built files will be in `build/web/` directory.
+## Deployment
 
-### Deployment
+The app is automatically deployed to GitHub Pages via GitHub Actions on push to main branch.
 
-1. Deploy the `build/web/` directory to an HTTPS-enabled server
-2. Ensure the server includes proper headers for PWA support
-3. Test installation on mobile devices
+### Manual deployment options:
+1. **GitHub Pages** - Push to gh-pages branch
+2. **Netlify** - Drop build/web folder
+3. **Vercel** - Import GitHub repo
+4. **Any static host** - Upload build/web contents
 
-## Architecture
+## Browser Support
 
-- **State Management**: Provider pattern
-- **Data Persistence**: Hive for web (IndexedDB)
-- **Map Rendering**: flutter_map with OpenStreetMap tiles
-- **Game Graphics**: CustomPaint for zone and trail rendering
-- **Geometry Operations**: turf_dart for polygon operations
+- ✅ Chrome/Edge (Recommended)
+- ✅ Safari iOS 
+- ✅ Firefox
+- ✅ Samsung Internet
 
-## Game Rules
+## Privacy
 
-1. Start with a small circular zone around your starting position
-2. Walk outside your zone to start drawing a trail
-3. Return to your zone to capture the area enclosed by your trail
-4. Minimum capture area: 150 m²
-5. Minimum trail vertices: 10 points
-
-## Permissions
-
-The app requires location permission (foreground only) to track movement and enable gameplay.
+- No data collection
+- No accounts required  
+- GPS data stays on device
+- No external analytics
 
 ## License
 
-MIT License
+MIT License - See LICENSE file

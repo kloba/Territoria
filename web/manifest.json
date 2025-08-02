@@ -1,13 +1,15 @@
 {
-    "name": "Territoria",
+    "name": "Territoria - GPS Territory Game",
     "short_name": "Territoria",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A GPS-based territory capture game",
-    "orientation": "portrait-primary",
+    "background_color": "#0D47A1",
+    "theme_color": "#1976D2",
+    "description": "Capture real-world territory by walking around with GPS",
+    "orientation": "portrait",
     "prefer_related_applications": false,
+    "scope": "/",
+    "categories": ["games", "sports"],
     "icons": [
         {
             "src": "icons/Icon-192.png",

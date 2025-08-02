@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'providers/game_state_provider.dart';
-import 'providers/location_provider.dart';
-import 'providers/stats_provider.dart';
-import 'screens/game_screen.dart';
-import 'screens/permission_screen.dart';
+import 'package:flutter/services.dart';
+import 'simple_game.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const TerritoriaApp());
 }
 
@@ -16,37 +16,18 @@ class TerritoriaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => LocationProvider()),
-        ChangeNotifierProvider(create: (_) => GameStateProvider()),
-        ChangeNotifierProvider(create: (_) => StatsProvider()),
-      ],
-      child: MaterialApp(
-        title: 'Territoria',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
+    return MaterialApp(
+      title: 'Territoria',
+      theme: ThemeData(
+        primaryColor: const Color(0xFF1976D2),
+        scaffoldBackgroundColor: const Color(0xFF0D47A1),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1976D2),
+          brightness: Brightness.dark,
         ),
-        home: const AppWrapper(),
-        debugShowCheckedModeBanner: false,
       ),
-    );
-  }
-}
-
-class AppWrapper extends StatelessWidget {
-  const AppWrapper({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<LocationProvider>(
-      builder: (context, locationProvider, child) {
-        if (!locationProvider.hasPermission) {
-          return const PermissionScreen();
-        }
-        return const GameScreen();
-      },
+      home: const SimpleGame(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

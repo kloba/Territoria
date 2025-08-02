@@ -5,14 +5,18 @@
   
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="A GPS-based territory capture game">
   
-  <!-- iOS meta tags & icons -->
+  <!-- PWA meta tags -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Territoria">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  
+  <!-- Theme color -->
+  <meta name="theme-color" content="#1976D2">
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
@@ -20,17 +24,69 @@
   <title>Territoria</title>
   <link rel="manifest" href="manifest.json">
   
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0D47A1;
+    }
+    
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #0D47A1;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .loading-content {
+      text-align: center;
+    }
+    
+    .loading h1 {
+      margin: 0 0 20px 0;
+      font-size: 48px;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      margin: 20px auto;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+  
   <script>
-    // The value below is injected by flutter build, do not touch.
     var serviceWorkerVersion = null;
   </script>
-  <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
 <body>
+  <!-- Loading screen -->
+  <div class="loading" id="loading">
+    <div class="loading-content">
+      <h1>Territoria</h1>
+      <div class="loading-spinner"></div>
+      <p>Loading game...</p>
+    </div>
+  </div>
+  
   <script>
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
+      // Hide loading screen when Flutter loads
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
@@ -38,6 +94,10 @@
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(function(appRunner) {
             appRunner.runApp();
+            // Hide loading screen after app starts
+            setTimeout(function() {
+              document.getElementById('loading').style.display = 'none';
+            }, 500);
           });
         }
       });
