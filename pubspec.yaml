@@ -20,7 +20,7 @@ dependencies:
   permission_handler: ^11.2.0
   
   # Geometry operations
-  turf_dart: ^0.0.8
+  turf: ^0.0.8
   
   # Data persistence (temporarily disabled for deployment)
   # hive: ^2.2.3

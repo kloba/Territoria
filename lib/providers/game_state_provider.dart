@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 // import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:turf_dart/turf.dart' as turf;
+import 'package:turf/turf.dart' as turf;
 import '../models/captured_zone.dart';
 import '../models/game_state.dart';
 import '../models/settings.dart';
