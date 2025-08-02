@@ -1,0 +1,8 @@
+{
+  "name": "territoria",
+  "version": "1.0.0",
+  "description": "GPS-based territory capture game",
+  "scripts": {
+    "build": "echo 'Flutter project - use flutter build web'"
+  }
+}
