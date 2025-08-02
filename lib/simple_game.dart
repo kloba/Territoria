@@ -154,8 +154,10 @@ class _SimpleGameState extends State<SimpleGame> {
           }
           
           // Center map on current position
-          if (_mapController.ready) {
+          try {
             _mapController.move(currentLatLng, _mapController.camera.zoom);
+          } catch (e) {
+            // Map controller might not be ready yet
           }
         });
       },
