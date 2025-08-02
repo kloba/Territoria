@@ -291,15 +291,17 @@ class _SimpleGameState extends State<SimpleGame> {
               initialZoom: 18,
               maxZoom: 19,
               minZoom: 15,
+              backgroundColor: Colors.grey[300]!,
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: const ['a', 'b', 'c'],
                 userAgentPackageName: 'com.example.territoria',
-                additionalOptions: {
-                  'crossOriginKeyword': 'anonymous',
+                maxZoom: 19,
+                errorTileCallback: (tile, error, stackTrace) {
+                  print('Error loading tile: $error');
                 },
-                tileProvider: NetworkTileProvider(),
               ),
               
               // Territory polygon
