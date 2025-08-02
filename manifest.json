@@ -1,0 +1,37 @@
+{
+    "name": "Territoria - GPS Territory Game",
+    "short_name": "Territoria",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0D47A1",
+    "theme_color": "#1976D2",
+    "description": "Capture real-world territory by walking around with GPS",
+    "orientation": "portrait",
+    "prefer_related_applications": false,
+    "scope": "./",
+    "categories": ["games", "sports"],
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
