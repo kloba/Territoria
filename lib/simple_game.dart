@@ -22,7 +22,7 @@ class _SimpleGameState extends State<SimpleGame> {
   // Location data
   Position? _currentPosition;
   final List<LatLng> _trail = [];
-  final List<LatLng> _territory = [];
+  List<LatLng> _territory = [];
   List<LatLng>? _capturedArea; // Temporary captured area to show
   Timer? _captureAnimationTimer;
   
