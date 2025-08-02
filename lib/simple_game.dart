@@ -22,6 +22,7 @@ class _SimpleGameState extends State<SimpleGame> {
   // Location data
   Position? _currentPosition;
   final List<LatLng> _trail = [];
+  final List<LatLng> _allPositions = []; // Keep all historical positions
   List<LatLng> _territory = [];
   List<LatLng>? _capturedArea; // Temporary captured area to show
   Timer? _captureAnimationTimer;
@@ -128,7 +129,7 @@ class _SimpleGameState extends State<SimpleGame> {
   void _startLocationTracking() {
     const locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 5, // meters
+      distanceFilter: 2, // meters - reduced for more frequent updates
     );
     
     Geolocator.getPositionStream(locationSettings: locationSettings).listen(
@@ -153,6 +154,10 @@ class _SimpleGameState extends State<SimpleGame> {
           
           // Add to trail if outside territory
           final currentLatLng = LatLng(position.latitude, position.longitude);
+          
+          // Always track all positions for debugging
+          _allPositions.add(currentLatLng);
+          
           if (!_isInsideTerritory(currentLatLng)) {
             _trail.add(currentLatLng);
           } else if (_trail.isNotEmpty) {
@@ -505,7 +510,20 @@ class _SimpleGameState extends State<SimpleGame> {
                   ],
                 ),
               
-              // Trail
+              // Historical positions (grey dots)
+              if (_allPositions.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _allPositions,
+                      color: Colors.grey.withOpacity(0.5),
+                      strokeWidth: 2,
+                      isDotted: true,
+                    ),
+                  ],
+                ),
+              
+              // Trail (active path outside territory)
               if (_trail.isNotEmpty)
                 PolylineLayer(
                   polylines: [
