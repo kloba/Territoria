@@ -1,19 +1,7 @@
-// import 'package:hive/hive.dart';
-
-// part 'daily_stats.g.dart';
-
-// @HiveType(typeId: 1)
 class DailyStats {
-  // @HiveField(0)
   final DateTime day;
-  
-  // @HiveField(1)
   final double distanceKm;
-  
-  // @HiveField(2)
   final int steps;
-  
-  // @HiveField(3)
   final double areaKm2;
 
   DailyStats({

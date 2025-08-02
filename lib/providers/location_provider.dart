@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class LocationProvider extends ChangeNotifier {
   bool _hasPermission = false;
@@ -27,8 +27,25 @@ class LocationProvider extends ChangeNotifier {
   }
   
   Future<void> _checkPermission() async {
-    final permission = await Permission.location.status;
-    _hasPermission = permission.isGranted;
+    if (kIsWeb) {
+      // Web permission handling
+      _hasPermission = true; // Will be checked when requesting location
+      notifyListeners();
+      return;
+    }
+    
+    // Mobile permission handling
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _hasPermission = false;
+      notifyListeners();
+      return;
+    }
+    
+    LocationPermission permission = await Geolocator.checkPermission();
+    _hasPermission = permission == LocationPermission.always || 
+                    permission == LocationPermission.whileInUse;
+    
     if (_hasPermission) {
       _startLocationTracking();
     }
@@ -36,8 +53,22 @@ class LocationProvider extends ChangeNotifier {
   }
   
   Future<void> requestPermission() async {
-    final permission = await Permission.location.request();
-    _hasPermission = permission.isGranted;
+    if (kIsWeb) {
+      // Web will request permission when getting location
+      _hasPermission = true;
+      _startLocationTracking();
+      notifyListeners();
+      return;
+    }
+    
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    
+    _hasPermission = permission == LocationPermission.always || 
+                    permission == LocationPermission.whileInUse;
+    
     if (_hasPermission) {
       _startLocationTracking();
     }
