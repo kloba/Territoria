@@ -295,10 +295,10 @@ class _SimpleGameState extends State<SimpleGame> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: const ['a', 'b', 'c'],
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.territoria',
                 maxZoom: 19,
+                retinaMode: false,
                 errorTileCallback: (tile, error, stackTrace) {
                   print('Error loading tile: $error');
                 },
