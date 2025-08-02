@@ -246,15 +246,15 @@ class GameStateProvider extends ChangeNotifier {
   double _calculatePolygonArea(List<LatLng> polygon) {
     final coords = polygon.map((p) => turf.Position(p.longitude, p.latitude)).toList();
     final turfPolygon = turf.Polygon(coordinates: [coords]);
-    return turf.area(turfPolygon).toDouble();
+    return turf.area(turfPolygon) ?? 0.0;
   }
   
   bool _isPointInPolygon(LatLng point, List<LatLng> polygon) {
-    final turfPoint = turf.Point(coordinates: turf.Position(point.longitude, point.latitude));
+    final position = turf.Position(point.longitude, point.latitude);
     final coords = polygon.map((p) => turf.Position(p.longitude, p.latitude)).toList();
     final turfPolygon = turf.Polygon(coordinates: [coords]);
     
-    return turf.booleanPointInPolygon(turfPoint, turfPolygon);
+    return turf.booleanPointInPolygon(position, turfPolygon);
   }
   
   LatLng? _findBoundaryIntersection(LatLng p1, LatLng p2) {
