@@ -23,6 +23,8 @@ class _SimpleGameState extends State<SimpleGame> {
   Position? _currentPosition;
   final List<LatLng> _trail = [];
   final List<LatLng> _territory = [];
+  List<LatLng>? _capturedArea; // Temporary captured area to show
+  Timer? _captureAnimationTimer;
   
   // Map controller
   final MapController _mapController = MapController();
@@ -200,47 +202,98 @@ class _SimpleGameState extends State<SimpleGame> {
       return;
     }
     
-    // Create new territory by combining trail with existing territory
-    List<LatLng> newTerritory = [];
+    // Create captured area polygon (trail + territory segment)
+    List<LatLng> capturedPolygon = [];
     
-    // Find entry and exit points where trail meets territory
-    LatLng entryPoint = _trail.first;
-    LatLng exitPoint = _trail.last;
+    // Add all trail points
+    capturedPolygon.addAll(_trail);
     
-    // Add trail points
-    newTerritory.addAll(_trail);
+    // Find where trail exits and enters territory
+    int exitIndex = _findClosestTerritoryIndex(_trail.first);
+    int entryIndex = _findClosestTerritoryIndex(_trail.last);
     
-    // Find closest territory points to connect the loop
-    int entryIndex = _findClosestTerritoryIndex(entryPoint);
-    int exitIndex = _findClosestTerritoryIndex(exitPoint);
-    
-    // Add territory points between exit and entry to close the loop
-    if (entryIndex != exitIndex) {
-      int current = exitIndex;
-      while (current != entryIndex) {
-        newTerritory.add(_territory[current]);
+    // Add territory points to close the loop
+    if (exitIndex != entryIndex) {
+      // Go clockwise from entry to exit
+      int current = entryIndex;
+      while (current != exitIndex) {
+        capturedPolygon.add(_territory[current]);
         current = (current + 1) % _territory.length;
       }
+      capturedPolygon.add(_territory[exitIndex]);
     }
     
-    // Simplify and update territory
-    _territory.clear();
-    _territory.addAll(_simplifyPolygon(newTerritory));
+    // Show captured area temporarily
+    setState(() {
+      _capturedArea = List.from(capturedPolygon);
+    });
     
-    // Update metrics
-    _captures++;
-    _territoryArea = _calculateArea(_territory);
+    // Animate for 1 second then merge
+    _captureAnimationTimer?.cancel();
+    _captureAnimationTimer = Timer(const Duration(seconds: 1), () {
+      setState(() {
+        // Merge captured area into territory
+        _territory = _expandTerritory(_territory, capturedPolygon);
+        _capturedArea = null;
+        
+        // Update metrics
+        _captures++;
+        _territoryArea = _calculateArea(_territory);
+      });
+    });
     
-    // Clear trail
+    // Clear trail immediately
     _trail.clear();
     
     // Show capture notification
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Territory captured! Total: ${_territoryArea.toStringAsFixed(0)}m²'),
+        content: Text('Territory captured! +${_calculateArea(capturedPolygon).toStringAsFixed(0)}m²'),
         backgroundColor: Colors.green,
       ),
     );
+  }
+  
+  List<LatLng> _expandTerritory(List<LatLng> territory, List<LatLng> captured) {
+    // Find convex hull of all points for simple union
+    List<LatLng> allPoints = [];
+    allPoints.addAll(territory);
+    allPoints.addAll(captured);
+    
+    // Simple convex hull using gift wrapping algorithm
+    if (allPoints.length < 3) return allPoints;
+    
+    // Find leftmost point
+    int leftmost = 0;
+    for (int i = 1; i < allPoints.length; i++) {
+      if (allPoints[i].longitude < allPoints[leftmost].longitude) {
+        leftmost = i;
+      }
+    }
+    
+    List<LatLng> hull = [];
+    int p = leftmost;
+    do {
+      hull.add(allPoints[p]);
+      int q = (p + 1) % allPoints.length;
+      
+      for (int i = 0; i < allPoints.length; i++) {
+        if (_orientation(allPoints[p], allPoints[i], allPoints[q]) == 2) {
+          q = i;
+        }
+      }
+      
+      p = q;
+    } while (p != leftmost && hull.length < allPoints.length);
+    
+    return _simplifyPolygon(hull);
+  }
+  
+  int _orientation(LatLng p, LatLng q, LatLng r) {
+    double val = (q.longitude - p.longitude) * (r.latitude - p.latitude) -
+                 (q.latitude - p.latitude) * (r.longitude - p.longitude);
+    if (val == 0) return 0;
+    return (val > 0) ? 1 : 2;
   }
   
   int _findClosestTerritoryIndex(LatLng point) {
@@ -439,6 +492,19 @@ class _SimpleGameState extends State<SimpleGame> {
                   ],
                 ),
               
+              // Captured area animation (shows temporarily)
+              if (_capturedArea != null && _capturedArea!.isNotEmpty)
+                PolygonLayer(
+                  polygons: [
+                    Polygon(
+                      points: _capturedArea!,
+                      color: Colors.green.withOpacity(0.5),
+                      borderColor: Colors.green,
+                      borderStrokeWidth: 2,
+                    ),
+                  ],
+                ),
+              
               // Trail
               if (_trail.isNotEmpty)
                 PolylineLayer(
@@ -565,6 +631,7 @@ class _SimpleGameState extends State<SimpleGame> {
   
   @override
   void dispose() {
+    _captureAnimationTimer?.cancel();
     _mapController.dispose();
     super.dispose();
   }
