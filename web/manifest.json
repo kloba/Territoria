@@ -8,7 +8,7 @@
     "description": "Capture real-world territory by walking around with GPS",
     "orientation": "portrait",
     "prefer_related_applications": false,
-    "scope": "/",
+    "scope": "./",
     "categories": ["games", "sports"],
     "icons": [
         {
