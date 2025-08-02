@@ -131,6 +131,11 @@ class _SimpleGameState extends State<SimpleGame> {
     
     Geolocator.getPositionStream(locationSettings: locationSettings).listen(
       (Position position) {
+        // Filter out poor accuracy readings
+        if (position.accuracy > 20.0) {
+          return; // Skip this update
+        }
+        
         setState(() {
           // Update distance
           if (_currentPosition != null) {
@@ -195,9 +200,36 @@ class _SimpleGameState extends State<SimpleGame> {
       return;
     }
     
-    // Simple capture: just expand territory slightly
+    // Create new territory by combining trail with existing territory
+    List<LatLng> newTerritory = [];
+    
+    // Find entry and exit points where trail meets territory
+    LatLng entryPoint = _trail.first;
+    LatLng exitPoint = _trail.last;
+    
+    // Add trail points
+    newTerritory.addAll(_trail);
+    
+    // Find closest territory points to connect the loop
+    int entryIndex = _findClosestTerritoryIndex(entryPoint);
+    int exitIndex = _findClosestTerritoryIndex(exitPoint);
+    
+    // Add territory points between exit and entry to close the loop
+    if (entryIndex != exitIndex) {
+      int current = exitIndex;
+      while (current != entryIndex) {
+        newTerritory.add(_territory[current]);
+        current = (current + 1) % _territory.length;
+      }
+    }
+    
+    // Simplify and update territory
+    _territory.clear();
+    _territory.addAll(_simplifyPolygon(newTerritory));
+    
+    // Update metrics
     _captures++;
-    _territoryArea += _trail.length * 10.0; // Simple area calculation
+    _territoryArea = _calculateArea(_territory);
     
     // Clear trail
     _trail.clear();
@@ -209,6 +241,96 @@ class _SimpleGameState extends State<SimpleGame> {
         backgroundColor: Colors.green,
       ),
     );
+  }
+  
+  int _findClosestTerritoryIndex(LatLng point) {
+    int closestIndex = 0;
+    double minDistance = double.infinity;
+    
+    for (int i = 0; i < _territory.length; i++) {
+      double distance = Geolocator.distanceBetween(
+        point.latitude, point.longitude,
+        _territory[i].latitude, _territory[i].longitude,
+      );
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = i;
+      }
+    }
+    
+    return closestIndex;
+  }
+  
+  List<LatLng> _simplifyPolygon(List<LatLng> points) {
+    // Simple Douglas-Peucker simplification
+    if (points.length < 3) return points;
+    
+    const double tolerance = 5.0; // meters
+    List<LatLng> simplified = [];
+    
+    // Always keep first and last
+    simplified.add(points.first);
+    
+    for (int i = 1; i < points.length - 1; i++) {
+      // Keep point if it's far enough from the line between neighbors
+      double distance = _pointToLineDistance(
+        points[i],
+        points[i - 1],
+        points[i + 1],
+      );
+      if (distance > tolerance) {
+        simplified.add(points[i]);
+      }
+    }
+    
+    simplified.add(points.last);
+    return simplified;
+  }
+  
+  double _pointToLineDistance(LatLng point, LatLng lineStart, LatLng lineEnd) {
+    double A = point.latitude - lineStart.latitude;
+    double B = point.longitude - lineStart.longitude;
+    double C = lineEnd.latitude - lineStart.latitude;
+    double D = lineEnd.longitude - lineStart.longitude;
+    
+    double dot = A * C + B * D;
+    double lenSq = C * C + D * D;
+    double param = dot / lenSq;
+    
+    double xx, yy;
+    
+    if (param < 0) {
+      xx = lineStart.latitude;
+      yy = lineStart.longitude;
+    } else if (param > 1) {
+      xx = lineEnd.latitude;
+      yy = lineEnd.longitude;
+    } else {
+      xx = lineStart.latitude + param * C;
+      yy = lineStart.longitude + param * D;
+    }
+    
+    return Geolocator.distanceBetween(
+      point.latitude, point.longitude,
+      xx, yy,
+    );
+  }
+  
+  double _calculateArea(List<LatLng> polygon) {
+    // Shoelace formula for polygon area
+    double area = 0.0;
+    int n = polygon.length;
+    
+    for (int i = 0; i < n; i++) {
+      int j = (i + 1) % n;
+      area += polygon[i].longitude * polygon[j].latitude;
+      area -= polygon[j].longitude * polygon[i].latitude;
+    }
+    
+    area = area.abs() / 2.0;
+    
+    // Convert to square meters (approximate)
+    return area * 111320 * 111320 * math.cos(polygon[0].latitude * math.pi / 180);
   }
 
   @override
@@ -382,6 +504,8 @@ class _SimpleGameState extends State<SimpleGame> {
                     _buildStat('Distance', '${(_distanceWalked / 1000).toStringAsFixed(2)} km'),
                     _buildStat('Territory', '${_territoryArea.toStringAsFixed(0)} m²'),
                     _buildStat('Captures', _captures.toString()),
+                    if (_currentPosition != null)
+                      _buildStat('GPS', '±${_currentPosition!.accuracy.toStringAsFixed(0)}m'),
                   ],
                 ),
               ),
