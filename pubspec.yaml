@@ -15,8 +15,8 @@ dependencies:
   # Map and GPS
   flutter_map: ^6.0.0
   # flutter_map_tile_caching: ^9.0.0  # Temporarily disabled - requires newer SDK
-  geolocator: ^11.0.0
-  geolocator_web: ^3.0.0
+  geolocator: ^10.1.0
+  geolocator_web: ^2.2.0
   permission_handler: ^11.2.0
   
   # Geometry operations

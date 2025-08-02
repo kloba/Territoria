@@ -42,7 +42,7 @@ class MapPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    final path = Path();
+    final path = ui.Path();
     for (int i = 0; i < zone.length; i++) {
       final point = _latLngToScreen(zone[i]);
       if (i == 0) {
