@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+// import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:turf_dart/turf.dart' as turf;
 import '../models/captured_zone.dart';
@@ -59,15 +59,13 @@ class GameStateProvider extends ChangeNotifier {
   }
   
   Future<void> _loadData() async {
-    final zonesBox = Hive.box('captured_zones');
-    final settingsBox = Hive.box('settings');
-    
-    _capturedZones = zonesBox.values.cast<CapturedZone>().toList();
-    
-    if (settingsBox.containsKey('settings')) {
-      _settings = settingsBox.get('settings') as Settings;
-    }
-    
+    // Temporarily disabled Hive
+    // final zonesBox = Hive.box('captured_zones');
+    // final settingsBox = Hive.box('settings');
+    // _capturedZones = zonesBox.values.cast<CapturedZone>().toList();
+    // if (settingsBox.containsKey('settings')) {
+    //   _settings = settingsBox.get('settings') as Settings;
+    // }
     notifyListeners();
   }
   
@@ -131,8 +129,9 @@ class GameStateProvider extends ChangeNotifier {
   
   void updateSettings(Settings newSettings) {
     _settings = newSettings;
-    final settingsBox = Hive.box('settings');
-    settingsBox.put('settings', _settings);
+    // Temporarily disabled Hive
+    // final settingsBox = Hive.box('settings');
+    // settingsBox.put('settings', _settings);
     notifyListeners();
   }
   
@@ -271,11 +270,12 @@ class GameStateProvider extends ChangeNotifier {
   }
   
   Future<void> _saveZones() async {
-    final box = Hive.box('captured_zones');
-    await box.clear();
-    for (int i = 0; i < _capturedZones.length; i++) {
-      await box.put(i, _capturedZones[i]);
-    }
+    // Temporarily disabled Hive
+    // final box = Hive.box('captured_zones');
+    // await box.clear();
+    // for (int i = 0; i < _capturedZones.length; i++) {
+    //   await box.put(i, _capturedZones[i]);
+    // }
   }
   
   String exportAsGeoJson() {

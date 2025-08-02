@@ -22,10 +22,9 @@ dependencies:
   # Geometry operations
   turf_dart: ^0.0.8
   
-  # Data persistence
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
-  hive_web: ^0.1.1
+  # Data persistence (temporarily disabled for deployment)
+  # hive: ^2.2.3
+  # hive_flutter: ^1.1.0
   
   # Utilities
   latlong2: ^0.9.0

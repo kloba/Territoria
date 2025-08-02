@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+// import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/daily_stats.dart';
 import '../models/settings.dart';
@@ -19,18 +19,16 @@ class StatsProvider extends ChangeNotifier {
   }
   
   Future<void> _loadStats() async {
-    final box = Hive.box('daily_stats');
-    _historicalStats = box.values.cast<DailyStats>().toList();
+    // Temporarily disabled Hive
+    // final box = Hive.box('daily_stats');
+    // _historicalStats = box.values.cast<DailyStats>().toList();
     
     final today = _getToday();
-    _todayStats = _historicalStats.firstWhere(
-      (stats) => _isSameDay(stats.day, today),
-      orElse: () => DailyStats(
-        day: today,
-        distanceKm: 0.0,
-        steps: 0,
-        areaKm2: 0.0,
-      ),
+    _todayStats = DailyStats(
+      day: today,
+      distanceKm: 0.0,
+      steps: 0,
+      areaKm2: 0.0,
     );
     
     notifyListeners();
@@ -92,19 +90,18 @@ class StatsProvider extends ChangeNotifier {
   }
   
   Future<void> _saveStats() async {
-    final box = Hive.box('daily_stats');
-    
-    final existingIndex = _historicalStats.indexWhere(
-      (stats) => _isSameDay(stats.day, _todayStats!.day),
-    );
-    
-    if (existingIndex >= 0) {
-      _historicalStats[existingIndex] = _todayStats!;
-      await box.putAt(existingIndex, _todayStats!);
-    } else {
-      _historicalStats.add(_todayStats!);
-      await box.add(_todayStats!);
-    }
+    // Temporarily disabled Hive
+    // final box = Hive.box('daily_stats');
+    // final existingIndex = _historicalStats.indexWhere(
+    //   (stats) => _isSameDay(stats.day, _todayStats!.day),
+    // );
+    // if (existingIndex >= 0) {
+    //   _historicalStats[existingIndex] = _todayStats!;
+    //   await box.putAt(existingIndex, _todayStats!);
+    // } else {
+    //   _historicalStats.add(_todayStats!);
+    //   await box.add(_todayStats!);
+    // }
   }
   
   DateTime _getToday() {

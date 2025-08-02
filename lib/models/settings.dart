@@ -1,13 +1,13 @@
-import 'package:hive/hive.dart';
+// import 'package:hive/hive.dart';
 
-part 'settings.g.dart';
+// part 'settings.g.dart';
 
-@HiveType(typeId: 2)
+// @HiveType(typeId: 2)
 class Settings {
-  @HiveField(0)
+  // @HiveField(0)
   final double strideLengthM;
   
-  @HiveField(1)
+  // @HiveField(1)
   final String captureMode;
 
   Settings({

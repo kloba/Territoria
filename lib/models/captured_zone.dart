@@ -1,17 +1,17 @@
 import 'package:latlong2/latlong.dart';
-import 'package:hive/hive.dart';
+// import 'package:hive/hive.dart';
 
-part 'captured_zone.g.dart';
+// part 'captured_zone.g.dart';
 
-@HiveType(typeId: 0)
+// @HiveType(typeId: 0)
 class CapturedZone {
-  @HiveField(0)
+  // @HiveField(0)
   final List<LatLng> polygon;
   
-  @HiveField(1)
+  // @HiveField(1)
   final DateTime timestamp;
   
-  @HiveField(2)
+  // @HiveField(2)
   final double areaM2;
 
   CapturedZone({
@@ -37,20 +37,21 @@ class CapturedZone {
   }
 }
 
-class LatLngAdapter extends TypeAdapter<LatLng> {
-  @override
-  final int typeId = 3;
-
-  @override
-  LatLng read(BinaryReader reader) {
-    final lat = reader.readDouble();
-    final lng = reader.readDouble();
-    return LatLng(lat, lng);
-  }
-
-  @override
-  void write(BinaryWriter writer, LatLng obj) {
-    writer.writeDouble(obj.latitude);
-    writer.writeDouble(obj.longitude);
-  }
-}
+// Temporarily disabled Hive adapter
+// class LatLngAdapter extends TypeAdapter<LatLng> {
+//   @override
+//   final int typeId = 3;
+//
+//   @override
+//   LatLng read(BinaryReader reader) {
+//     final lat = reader.readDouble();
+//     final lng = reader.readDouble();
+//     return LatLng(lat, lng);
+//   }
+//
+//   @override
+//   void write(BinaryWriter writer, LatLng obj) {
+//     writer.writeDouble(obj.latitude);
+//     writer.writeDouble(obj.longitude);
+//   }
+// }
