@@ -296,6 +296,10 @@ class _SimpleGameState extends State<SimpleGame> {
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.territoria',
+                additionalOptions: {
+                  'crossOriginKeyword': 'anonymous',
+                },
+                tileProvider: NetworkTileProvider(),
               ),
               
               // Territory polygon
