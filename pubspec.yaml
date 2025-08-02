@@ -19,8 +19,8 @@ dependencies:
   geolocator_web: ^2.2.0
   permission_handler: ^11.2.0
   
-  # Geometry operations
-  turf: ^0.0.8
+  # Geometry operations (temporarily removed - using simple implementations)
+  # turf: ^0.0.8
   
   # Data persistence (temporarily disabled for deployment)
   # hive: ^2.2.3

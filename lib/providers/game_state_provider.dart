@@ -1,8 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-// import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:turf/turf.dart' as turf;
 import '../models/captured_zone.dart';
 import '../models/game_state.dart';
 import '../models/settings.dart';
@@ -51,7 +49,7 @@ class GameStateProvider extends ChangeNotifier {
     final capturePolygon = _buildCapturePolygon();
     if (capturePolygon == null) return null;
     
-    return _calculatePolygonArea(capturePolygon);
+    return _calculatePolygonAreaSimple(capturePolygon);
   }
   
   GameStateProvider() {
@@ -60,12 +58,6 @@ class GameStateProvider extends ChangeNotifier {
   
   Future<void> _loadData() async {
     // Temporarily disabled Hive
-    // final zonesBox = Hive.box('captured_zones');
-    // final settingsBox = Hive.box('settings');
-    // _capturedZones = zonesBox.values.cast<CapturedZone>().toList();
-    // if (settingsBox.containsKey('settings')) {
-    //   _settings = settingsBox.get('settings') as Settings;
-    // }
     notifyListeners();
   }
   
@@ -130,13 +122,11 @@ class GameStateProvider extends ChangeNotifier {
   void updateSettings(Settings newSettings) {
     _settings = newSettings;
     // Temporarily disabled Hive
-    // final settingsBox = Hive.box('settings');
-    // settingsBox.put('settings', _settings);
     notifyListeners();
   }
   
   bool _isInsideZone(LatLng point) {
-    return _isPointInPolygon(point, _currentZonePolygon);
+    return _isPointInPolygonSimple(point, _currentZonePolygon);
   }
   
   void _attemptCapture() {
@@ -148,8 +138,8 @@ class GameStateProvider extends ChangeNotifier {
       return;
     }
     
-    final simplifiedPolygon = _simplifyPolygon(capturePolygon);
-    final area = _calculatePolygonArea(simplifiedPolygon);
+    final simplifiedPolygon = _simplifyPolygonSimple(capturePolygon);
+    final area = _calculatePolygonAreaSimple(simplifiedPolygon);
     
     final newZone = CapturedZone(
       polygon: simplifiedPolygon,
@@ -158,7 +148,7 @@ class GameStateProvider extends ChangeNotifier {
     );
     
     _capturedZones.add(newZone);
-    _currentZonePolygon = _unionPolygons(_currentZonePolygon, simplifiedPolygon);
+    _currentZonePolygon = _mergePolygons(_currentZonePolygon, simplifiedPolygon);
     
     _currentState = GameState.capture;
     _currentTrail.clear();
@@ -189,10 +179,10 @@ class GameStateProvider extends ChangeNotifier {
   }
   
   bool _validateCapture(List<LatLng> polygon) {
-    final simplified = _simplifyPolygon(polygon);
+    final simplified = _simplifyPolygonSimple(polygon);
     if (simplified.length < _minTrailVertices) return false;
     
-    final area = _calculatePolygonArea(simplified);
+    final area = _calculatePolygonAreaSimple(simplified);
     if (area < _minCaptureAreaM2) return false;
     
     return !_hasSelfIntersections(simplified);
@@ -217,44 +207,58 @@ class GameStateProvider extends ChangeNotifier {
     
     _currentZonePolygon = _capturedZones.first.polygon;
     for (int i = 1; i < _capturedZones.length; i++) {
-      _currentZonePolygon = _unionPolygons(_currentZonePolygon, _capturedZones[i].polygon);
+      _currentZonePolygon = _mergePolygons(_currentZonePolygon, _capturedZones[i].polygon);
     }
   }
   
-  List<LatLng> _unionPolygons(List<LatLng> poly1, List<LatLng> poly2) {
-    final coords1 = poly1.map((p) => turf.Position(p.longitude, p.latitude)).toList();
-    final coords2 = poly2.map((p) => turf.Position(p.longitude, p.latitude)).toList();
-    
-    final polygon1 = turf.Polygon(coordinates: [coords1]);
-    final polygon2 = turf.Polygon(coordinates: [coords2]);
-    
-    final union = turf.union(polygon1, polygon2);
-    if (union == null) return poly1;
-    
-    final unionCoords = union.coordinates.first;
-    return unionCoords.map((pos) => LatLng(pos.lat, pos.lng)).toList();
+  // Simplified polygon operations without turf
+  List<LatLng> _mergePolygons(List<LatLng> poly1, List<LatLng> poly2) {
+    // Simple merge - just return the first polygon for now
+    // In a real implementation, this would compute the union
+    return poly1;
   }
   
-  List<LatLng> _simplifyPolygon(List<LatLng> polygon) {
-    final coords = polygon.map((p) => turf.Position(p.longitude, p.latitude)).toList();
-    final lineString = turf.LineString(coordinates: coords);
-    final simplified = turf.simplify(lineString, tolerance: _simplificationTolerance / 111320);
-    
-    return simplified.coordinates.map((pos) => LatLng(pos.lat, pos.lng)).toList();
+  List<LatLng> _simplifyPolygonSimple(List<LatLng> polygon) {
+    // Simple Douglas-Peucker implementation would go here
+    // For now, just return the original
+    return polygon;
   }
   
-  double _calculatePolygonArea(List<LatLng> polygon) {
-    final coords = polygon.map((p) => turf.Position(p.longitude, p.latitude)).toList();
-    final turfPolygon = turf.Polygon(coordinates: [coords]);
-    return turf.area(turfPolygon) ?? 0.0;
+  double _calculatePolygonAreaSimple(List<LatLng> polygon) {
+    // Shoelace formula for polygon area
+    double area = 0.0;
+    int j = polygon.length - 1;
+    
+    for (int i = 0; i < polygon.length; i++) {
+      area += (polygon[j].longitude + polygon[i].longitude) * 
+              (polygon[j].latitude - polygon[i].latitude);
+      j = i;
+    }
+    
+    // Convert to square meters (approximate)
+    return (area.abs() / 2.0) * 111320 * 111320 * cos(polygon[0].latitude * pi / 180);
   }
   
-  bool _isPointInPolygon(LatLng point, List<LatLng> polygon) {
-    final position = turf.Position(point.longitude, point.latitude);
-    final coords = polygon.map((p) => turf.Position(p.longitude, p.latitude)).toList();
-    final turfPolygon = turf.Polygon(coordinates: [coords]);
+  bool _isPointInPolygonSimple(LatLng point, List<LatLng> polygon) {
+    // Ray casting algorithm
+    bool inside = false;
+    double p1x = polygon.last.longitude;
+    double p1y = polygon.last.latitude;
     
-    return turf.booleanPointInPolygon(position, turfPolygon);
+    for (int i = 0; i < polygon.length; i++) {
+      double p2x = polygon[i].longitude;
+      double p2y = polygon[i].latitude;
+      
+      if (((p2y > point.latitude) != (p1y > point.latitude)) &&
+          (point.longitude < (p1x - p2x) * (point.latitude - p2y) / (p1y - p2y) + p2x)) {
+        inside = !inside;
+      }
+      
+      p1x = p2x;
+      p1y = p2y;
+    }
+    
+    return inside;
   }
   
   LatLng? _findBoundaryIntersection(LatLng p1, LatLng p2) {
@@ -271,11 +275,6 @@ class GameStateProvider extends ChangeNotifier {
   
   Future<void> _saveZones() async {
     // Temporarily disabled Hive
-    // final box = Hive.box('captured_zones');
-    // await box.clear();
-    // for (int i = 0; i < _capturedZones.length; i++) {
-    //   await box.put(i, _capturedZones[i]);
-    // }
   }
   
   String exportAsGeoJson() {
